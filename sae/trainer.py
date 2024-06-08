@@ -73,6 +73,7 @@ class SaeTrainer:
                 )
             except ImportError:
                 print("Weights & Biases not installed, skipping logging.")
+                self.cfg.log_to_wandb = False
 
         num_sae_params = sum(p.numel() for p in self.saes.parameters())
         num_model_params = sum(p.numel() for p in self.model.parameters())
@@ -154,7 +155,7 @@ class SaeTrainer:
                     if self.cfg.auxk_alpha > 0:
                         info[f"auxk/layer_{j}"] = maybe_all_reduce(out.auxk_loss).item()
 
-                    if rank_zero:
+                    if self.cfg.log_to_wandb and rank_zero:
                         wandb.log(
                             info,
                             step=self.n_training_steps,
